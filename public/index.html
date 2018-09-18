@@ -27,7 +27,10 @@
 	Terminal.applyAddon(fit);
         var term = new Terminal();
 	
-        var websocket = new WebSocket('ws://localhost:3000/term');
+	var l = window.location;
+	var wsUrl = l.protocol === 'https:' ? 'wss://' : 'ws://';
+	wsUrl += l.hostname + (l.port ? ':'+l.port: '') + '/term'
+        var websocket = new WebSocket(wsUrl);
 
         websocket.onmessage = function(event) {
             term.write(event.data);
