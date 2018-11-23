@@ -12,7 +12,9 @@ app.get('/', function(req, res, next){
 app.ws('/term', function(ws, req) {
 
   const child = spawn('/bin/bash', ['-i']);
-  
+  child.stdin.write('export TERM=xterm-256color\n');
+  child.stdin.write('clear\n');
+
   child.on('error', (err) => {
     console.log(err);
   });
