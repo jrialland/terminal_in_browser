@@ -11,11 +11,23 @@
 		height:100%;
 		background-color:black;
 	}
+	
 	#terminal {
 		width:100%;
 		height:100%;
 		padding:5px;
 	}
+	
+	@keyframes blurfx {
+		from { filter: none; }
+		to { filter: blur(4px); }
+	}
+	
+	.blurred {
+		animation : blurfx 2s linear;
+		animation-fill-mode: forwards;
+	}
+	
     </style>
     <script src="node_modules/xterm/dist/xterm.js"></script>
     <script src="node_modules/xterm/dist/addons/fit/fit.js"></script>
@@ -63,6 +75,11 @@
 
 		websocket.send(JSON.stringify({set_xy:{cols:term.cols, rows:term.rows}}));
 	};
+	
+	websocket.onclose = function() {
+		console.log('close');
+		document.body.classList.add('blurred');
+	}
 
 	window.onresize = function() {
 		term.fit();
