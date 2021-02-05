@@ -11,9 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "child_pty": "^3.0.8",
     "express": "^4.16.3",
     "express-ws": "^4.0.0",
+    "node-pty": "^0.10.0",
+    "winston": "^3.3.3",
     "xterm": "^3.8.1"
   }
 }

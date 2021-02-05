@@ -1,58 +1,72 @@
-var express = require('express');
-var app = express();
-var expressWs = require('express-ws')(app);
+const express = require('express');
+const app = express();
+const expressWs = require('express-ws')(app);
+const winston = require('winston');
+const spawn = require('node-pty').spawn;
 
+//------------------------------------------------------------------------------
+winston.addColors({
+  error: 'red',
+  warn: 'yellow',
+  info: 'cyan',
+  debug: 'green'
+});
 
-var spawn = require('child_pty').spawn;
+const logger = winston.createLogger({
+  level: 'debug',
+  format : winston.format.combine( winston.format.colorize(), winston.format.simple()),
+  transports : [
+  	new winston.transports.Console(),
+  ]
+});
 
+//------------------------------------------------------------------------------
 app.get('/', function(req, res, next){
   res.redirect('/index.html');
 });
 
+//------------------------------------------------------------------------------
 app.ws('/term', function(ws, req) {
-
-  const child = spawn('/bin/bash', ['-i']);
-  child.stdin.write('export TERM=xterm-256color\n');
-  child.stdin.write('clear\n');
-
+  logger.debug('starting session');
+  
+  const child = spawn('/bin/bash', ['-i'], {
+  	name: 'xterm-color',
+  	cols:80,
+  	rows:30,
+  	cwd: process.env.HOME,
+  	env:process.env
+  });
+  
   child.on('error', (err) => {
-    console.log(err);
+    logger.error('error', err);
   });
 
-  child.stdout.on('data', function(data) {
-	ws.send(data.toString('utf-8'));
-  });
-
-  child.stderr.on('data', function(data) {
+  child.on('data', function(data) {
 	ws.send(data.toString('utf-8'));
   });
 
   child.on('close', function(code) {
+      logger.debug('close');
       ws.close();
   });
 
   ws.on('message', function(msg) {
-    msg = JSON.parse(msg);
-    if(msg.data) {
-        s = child.stdin;
-        s.cork();
-        s.write(msg.data);
-        s.uncork();
-        return;
+    const m = JSON.parse(msg);
+    if(m.data) {
+        child.write(m.data);
+    } else if(m.set_xy) {        
+    	logger.debug(msg);
+	child.resize(m.set_xy.cols, m.set_xy.rows);
     }
-
-    else if(msg.set_xy) {
-        console.log(msg);
-	child.pty.resize({columns:msg.set_xy.cols, rows:msg.set_xy.rows});
-    }
-
   });
-
-
+  logger.debug('waiting for messages');
 });
 
+//------------------------------------------------------------------------------
 app.use(express.static('public'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
+//------------------------------------------------------------------------------
 app.listen(3000);
+logger.debug('http://localhost/3000')
 

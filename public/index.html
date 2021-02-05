@@ -25,7 +25,10 @@
 <script>
 
 	Terminal.applyAddon(fit);
-        var term = new Terminal();
+        var term = new Terminal({
+        	fontSize: 14,
+        	fontFamily: 'Ubuntu Mono, courier-new, courier, monospace'
+        });
 	
 	var l = window.location;
 	var wsUrl = l.protocol === 'https:' ? 'wss://' : 'ws://';
