@@ -1,5 +1,5 @@
 
-A terminal window in your web browser.
+A terminal window in your web browser, using node-pty, express and websockets
 
 <pre>
 npm start &
